@@ -314,6 +314,10 @@
       <div class="stat-count">共 <strong id="stat-total">0</strong> 人</div>
       <div></div>
 
+      <div class="stat-label">還活躍的人物</div>
+      <div class="stat-count">共 <strong id="stat-active-count">0</strong> 人</div>
+      <label class="stat-check"><input type="checkbox" id="f-active"> 不顯示</label>
+
       <div class="stat-label stat-dead">死亡/退場人物</div>
       <div class="stat-count">共 <strong id="stat-dead-count">0</strong> 人</div>
       <label class="stat-check"><input type="checkbox" id="f-dead"> 不顯示</label>
@@ -386,6 +390,7 @@ let editingDraft = null;
 let searchTerm = "";
 let filterDead = false;
 let filterAbsent = false;
+let filterActive = false;
 let reorderMode = false;
 let rangeLo = 1, rangeHi = TOTAL_CHAPTERS;
 let inlineState = null;
@@ -425,11 +430,13 @@ function chapLabel(n){
 }
 
 function render(){
-  // Update stats (unaffected by filters — always reflects full dataset)
+  // Update stats
   const totalCount = data.characters.length;
   const deadCount = data.characters.filter(c=>isDead(c)).length;
   const absentCount = data.characters.filter(c=>isAbsent(c)).length;
+  const activeCount = totalCount - deadCount - absentCount;
   document.getElementById("stat-total").textContent = totalCount;
+  document.getElementById("stat-active-count").textContent = activeCount;
   document.getElementById("stat-dead-count").textContent = deadCount;
   document.getElementById("stat-absent-count").textContent = absentCount;
 
@@ -456,6 +463,7 @@ function render(){
   const visible = data.characters.filter(c=>{
     if(filterDead && isDead(c)) return false;
     if(filterAbsent && isAbsent(c)) return false;
+    if(filterActive && !isDead(c) && !isAbsent(c)) return false;
     if(c.debut > hi) return false;
     const ec = endChap(c);
     if(ec != null && ec < lo) return false;
@@ -627,6 +635,7 @@ document.getElementById("searchbox").addEventListener("input",(e)=>{ searchTerm=
 document.getElementById("filter-btn").onclick = ()=>{ document.getElementById("filter-panel").classList.toggle("open"); };
 document.getElementById("f-dead").onchange = (e)=>{ filterDead=e.target.checked; render(); };
 document.getElementById("f-absent").onchange = (e)=>{ filterAbsent=e.target.checked; render(); };
+document.getElementById("f-active").onchange = (e)=>{ filterActive=e.target.checked; render(); };
 function applyRange(){
   let lo = parseInt(document.getElementById("f-lo").value) || 1;
   let hi = parseInt(document.getElementById("f-hi").value) || TOTAL_CHAPTERS;
