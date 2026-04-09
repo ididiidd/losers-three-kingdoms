@@ -311,6 +311,12 @@
   }
   .view-meta{display:flex;gap:14px;align-items:center;font-size:15px;color:#444;flex-wrap:wrap}
   .view-meta strong{font-size:18px;color:#111}
+  .view-notes{
+    margin-top:4px;background:#f0f0f0;border-radius:8px;
+    padding:10px 14px;font-size:14px;color:#444;line-height:1.6;
+    font-family:"Noto Serif TC","Songti TC",serif;
+  }
+  .view-notes:empty{display:none}
   .view-badge{
     display:inline-block;padding:3px 12px;border-radius:20px;
     font-size:13px;font-weight:700;letter-spacing:1px;
@@ -406,6 +412,7 @@
     <div class="view-head">
       <div class="view-name" id="view-name"></div>
       <div class="view-meta" id="view-meta"></div>
+      <div class="view-notes" id="view-notes"></div>
     </div>
     <hr class="ed-divider">
     <h3 class="view-fail-heading">失敗紀錄</h3>
@@ -688,6 +695,8 @@ function openInfoCard(id){
     badge.textContent = "暫時中離 · 第 " + a.chap + " 回";
     meta.appendChild(badge);
   }
+
+  document.getElementById("view-notes").textContent = c.notes || "";
 
   const list = document.getElementById("view-fail-list");
   list.innerHTML = "";
