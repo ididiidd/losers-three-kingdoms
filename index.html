@@ -194,7 +194,7 @@
   #modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:200}
   #modal-bg.open{display:flex}
   #modal{
-    background:#fff;border-radius:18px;padding:36px 42px 30px;width:560px;
+    background:#fff;border-radius:18px;padding:36px 42px 30px;width:680px;
     font-family:"Noto Serif TC","Songti TC",serif;max-height:92vh;overflow-y:auto;
     box-shadow:0 20px 60px rgba(0,0,0,.2);
   }
@@ -304,21 +304,28 @@
   .ed-btn.danger{background:#fff;color:var(--fail-red);border:1.5px solid var(--fail-red)}
 
   /* ===== Viewer read-only modal ===== */
-  .view-head{display:flex;flex-direction:column;gap:14px;margin-bottom:8px}
+  .view-head{display:flex;align-items:stretch;gap:28px;margin-bottom:8px}
+  .view-left{display:flex;flex-direction:column;justify-content:space-between;flex-shrink:0;gap:14px;padding:4px 0}
   .view-name{
     font-size:46px;font-weight:900;letter-spacing:4px;color:#111;
-    padding:4px 0;
+    line-height:1.1;
   }
-  .view-meta{display:flex;gap:14px;align-items:center;font-size:15px;color:#444;flex-wrap:wrap}
-  .view-meta strong{font-size:18px;color:#111}
+  .view-debut{font-size:14px;color:#444;font-weight:700;white-space:nowrap}
+  .view-debut strong{font-size:17px;color:#111;margin:0 2px}
+  .view-right{flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-width:0}
   .view-notes{
-    margin-top:4px;background:#f0f0f0;border-radius:8px;
-    padding:10px 14px;font-size:14px;color:#444;line-height:1.6;
+    flex:1;background:#f0f0f0;border-radius:12px;
+    padding:16px 20px;font-size:15px;color:#333;line-height:1.7;
     font-family:"Noto Serif TC","Songti TC",serif;
+    display:flex;align-items:center;
+    min-height:60px;
   }
-  .view-notes:empty{display:none}
+  .view-notes:empty::before{
+    content:"（尚無備註）";color:#bbb;font-weight:400;font-style:italic;font-size:14px;
+  }
+  .view-badge-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-height:28px}
   .view-badge{
-    display:inline-block;padding:3px 12px;border-radius:20px;
+    display:inline-block;padding:4px 14px;border-radius:20px;
     font-size:13px;font-weight:700;letter-spacing:1px;
   }
   .view-badge-dead{background:#fbe8e8;color:var(--fail-red)}
@@ -410,9 +417,14 @@
 <div id="modal-bg">
   <div id="modal">
     <div class="view-head">
-      <div class="view-name" id="view-name"></div>
-      <div class="view-meta" id="view-meta"></div>
-      <div class="view-notes" id="view-notes"></div>
+      <div class="view-left">
+        <div class="view-name" id="view-name"></div>
+        <div class="view-debut" id="view-debut"></div>
+      </div>
+      <div class="view-right">
+        <div class="view-notes" id="view-notes"></div>
+        <div class="view-badge-row" id="view-badge-row"></div>
+      </div>
     </div>
     <hr class="ed-divider">
     <h3 class="view-fail-heading">失敗紀錄</h3>
@@ -676,24 +688,22 @@ function openInfoCard(id){
   const c = data.characters.find(x=>x.id===id);
   if(!c) return;
   document.getElementById("view-name").textContent = c.name;
+  document.getElementById("view-debut").innerHTML = "登場：第 <strong>" + c.debut + "</strong> 回";
 
-  const meta = document.getElementById("view-meta");
-  meta.innerHTML = "";
-  const debut = document.createElement("span");
-  debut.innerHTML = "登場：第 <strong>" + c.debut + "</strong> 回";
-  meta.appendChild(debut);
+  const badgeRow = document.getElementById("view-badge-row");
+  badgeRow.innerHTML = "";
   if(isDead(c)){
     const d = getDeath(c);
     const badge = document.createElement("span");
     badge.className = "view-badge view-badge-dead";
     badge.textContent = "已退場 · 第 " + d.chap + " 回";
-    meta.appendChild(badge);
+    badgeRow.appendChild(badge);
   } else if(isAbsent(c)){
     const a = getAbsent(c);
     const badge = document.createElement("span");
     badge.className = "view-badge view-badge-absent";
     badge.textContent = "暫時中離 · 第 " + a.chap + " 回";
-    meta.appendChild(badge);
+    badgeRow.appendChild(badge);
   }
 
   document.getElementById("view-notes").textContent = c.notes || "";
