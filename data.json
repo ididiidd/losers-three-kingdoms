@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-04-09T19:44:11.575Z",
+  "exportedAt": "2026-04-09T19:59:16.544Z",
   "characters": [
     {
       "id": "c1775745435618",
@@ -55,25 +55,29 @@
           "reason": "曹節進讒言，導致開除",
           "type": "absent"
         }
-      ]
+      ],
+      "notes": ""
     },
     {
       "id": "c1775747420766",
       "name": "曹節",
       "debut": 1,
-      "failures": []
+      "failures": [],
+      "notes": "十常侍之一"
     },
     {
       "id": "c1775747529095",
       "name": "張讓",
       "debut": 1,
-      "failures": []
+      "failures": [],
+      "notes": "十常侍之一"
     },
     {
       "id": "c1775747534041",
       "name": "趙忠",
       "debut": 1,
-      "failures": []
+      "failures": [],
+      "notes": "十常侍之一"
     },
     {
       "id": "c1775747542227",
@@ -85,43 +89,50 @@
           "reason": "私通黃巾軍馬元義，被何進下獄",
           "type": "death"
         }
-      ]
+      ],
+      "notes": "十常侍之一"
     },
     {
       "id": "c1775747624307",
       "name": "段珪",
       "debut": 1,
-      "failures": []
+      "failures": [],
+      "notes": "十常侍之一"
     },
     {
       "id": "c1775747628894",
       "name": "侯覽",
       "debut": 1,
-      "failures": []
+      "failures": [],
+      "notes": "十常侍之一"
     },
     {
       "id": "c1775747642098",
       "name": "蹇碩",
       "debut": 1,
-      "failures": []
+      "failures": [],
+      "notes": "十常侍之一"
     },
     {
       "id": "c1775747650845",
       "name": "程曠",
       "debut": 1,
-      "failures": []
+      "failures": [],
+      "notes": "十常侍之一"
     },
     {
       "id": "c1775747671211",
       "name": "夏惲",
       "debut": 1,
-      "failures": []
+      "failures": [],
+      "notes": "十常侍之一"
     },
     {
       "id": "c1775747721931",
       "name": "郭勝",
       "debut": 1,
-      "failures": []
+      "failures": [],
+      "notes": "十常侍之一"
     },
     {
       "id": "c1775747780585",
@@ -193,7 +204,8 @@
           "reason": "不願賄賂宦官，被囚車押回洛陽",
           "type": "absent"
         }
-      ]
+      ],
+      "notes": "北中郎將，劉備的老師"
     },
     {
       "id": "c1775748194943",
@@ -299,10 +311,10 @@
     }
   ],
   "progress": {
-    "text": "第 6 回：為什麼董卓要派人反覆進城門？",
+    "text": "第 3 回：董卓入京",
     "link": "https://youtu.be/XkXU4D6xdio",
-    "chapter": 6
+    "chapter": 3
   },
   "rangeLo": 1,
-  "rangeHi": 6
+  "rangeHi": 3
 }
