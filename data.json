@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-04-09T19:22:01.876Z",
+  "exportedAt": "2026-04-09T19:30:21.383Z",
   "characters": [
     {
       "id": "c1775745435618",
@@ -296,5 +296,12 @@
       "debut": 1,
       "failures": []
     }
-  ]
+  ],
+  "progress": {
+    "text": "第 4 回：為什麼董卓要派人反覆進城門？",
+    "link": "https://youtu.be/XkXU4D6xdio",
+    "chapter": 4
+  },
+  "rangeLo": 1,
+  "rangeHi": 120
 }
