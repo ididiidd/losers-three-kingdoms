@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>失敗者的三國</title>
+<style>
+  :root{
+    --bg:#F4F4F4;
+    --ink:#111111;
+    --gray:#B8B8B8;
+    --alive-green:#5BAE7B;
+    --fail-red:#D04545;
+    --dash:#D8D8D8;
+    --row-h:64px;
+    --col-w:54px;
+    --name-h:120px;
+    --chap-w:100px;
+    --grid-pad-left:150px;
+    --header-top:120px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:"Noto Serif TC","Songti TC",serif;overflow:hidden;height:100%}
+  #topbar{
+    position:fixed;top:0;left:40px;right:0;height:var(--header-top);
+    background:var(--bg);z-index:60;display:flex;align-items:center;
+    padding:40px 48px 22px;gap:18px;
+  }
+  h1{font-size:40px;font-weight:900;letter-spacing:2px;white-space:nowrap}
+  .icon-btn{
+    width:42px;height:36px;border:none;background:transparent;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;border-radius:8px;
+  }
+  .icon-btn:hover{background:#e8e8e8}
+  .icon-btn svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:2}
+  #searchbox{
+    background:#e8e8e8;border:none;border-radius:20px;padding:10px 18px 10px 44px;
+    font-size:15px;width:340px;font-family:inherit;outline:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.2'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>");
+    background-repeat:no-repeat;background-position:16px center;
+  }
+  #filter-panel{
+    position:absolute;top:86px;left:360px;background:#fff;border-radius:12px;
+    box-shadow:0 8px 30px rgba(0,0,0,.15);padding:16px 20px;display:none;z-index:70;
+    font-size:14px;min-width:280px;
+  }
+  #filter-panel.open{display:block}
+  #filter-panel label{display:flex;align-items:center;gap:10px;padding:6px 0;cursor:pointer}
+  #filter-panel input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#111}
+  #filter-panel hr{border:none;border-top:1px solid #eee;margin:10px 0}
+  #filter-panel input[type=text]{-moz-appearance:textfield}
+  .reorder-btn{
+    display:flex;align-items:center;gap:8px;
+    border:none;background:#111;color:#fff;padding:8px 14px;border-radius:8px;
+    font-size:13px;font-family:inherit;cursor:pointer;font-weight:700;
+    transition:.15s;
+  }
+  .reorder-btn:hover{filter:brightness(1.15)}
+  .reorder-btn.active{background:#FFB366;color:#111}
+  .data-btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    border:1.5px solid #333;background:#fff;color:#111;padding:7px 10px;border-radius:7px;
+    font-size:12px;font-family:inherit;font-weight:700;cursor:pointer;transition:.15s;
+  }
+  .data-btn:hover{background:#111;color:#fff}
+
+  #grid-wrap{position:fixed;top:var(--header-top);left:40px;right:0;bottom:0;overflow:auto}
+  #grid{position:relative;padding-left:var(--grid-pad-left)}
+
+  #corner{position:absolute;top:0;left:0;width:var(--chap-w);height:var(--name-h);background:var(--bg);z-index:40}
+
+  #chapters{position:absolute;top:var(--name-h);left:0;width:var(--chap-w);z-index:25;background:var(--bg)}
+  .chap-row{
+    height:var(--row-h);display:flex;align-items:center;justify-content:flex-end;
+    padding-right:18px;font-size:10px;font-weight:700;
+    border-bottom:1px dashed var(--dash);background:var(--bg);color:#333;
+  }
+  #add-chap{
+    height:44px;display:flex;align-items:center;justify-content:center;
+    color:#888;font-size:13px;cursor:pointer;border:1.5px dashed #ccc;
+    margin:10px 12px;border-radius:8px;background:var(--bg);
+  }
+  #add-chap:hover{color:#111;border-color:#111}
+
+  #names{position:absolute;top:0;left:var(--chap-w);height:var(--name-h);display:flex;z-index:30;background:var(--bg)}
+  .name-cell{width:var(--col-w);display:flex;align-items:flex-start;justify-content:center;padding-top:8px;flex-shrink:0}
+  .nameplate{
+    width:34px;background:var(--ink);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    padding:12px 0;font-size:13px;font-weight:800;border-radius:3px;
+    cursor:pointer;writing-mode:vertical-rl;text-orientation:upright;
+    letter-spacing:3px;user-select:none;white-space:nowrap;
+    box-shadow:0 2px 6px rgba(0,0,0,.15);transition:opacity .15s;
+  }
+  .nameplate.add{min-height:70px}
+  .nameplate.dead{background:var(--gray);color:#fff;box-shadow:none}
+  .nameplate.absent{background:var(--alive-green);color:#fff}
+  .nameplate.add{background:transparent;color:#aaa;border:2px dashed #bbb;font-size:26px;writing-mode:horizontal-tb;letter-spacing:0;font-weight:400}
+  .nameplate.add:hover{color:#111;border-color:#111}
+  .dim{opacity:.12}
+  .highlight{outline:3px solid #ff9500;outline-offset:3px;border-radius:5px}
+
+  body.reorder .nameplate:not(.add){cursor:grab}
+  body.reorder .nameplate.dragging{opacity:.4;cursor:grabbing}
+  body.reorder .name-cell.drop-target{background:rgba(255,149,0,.2);border-radius:6px}
+
+  #rows{position:absolute;top:var(--name-h);left:var(--chap-w);pointer-events:none;z-index:1}
+  .row-line{height:var(--row-h);border-bottom:1px dashed var(--dash)}
+
+  #cols{position:absolute;top:var(--name-h);left:var(--chap-w);display:flex;z-index:5}
+  .col{width:var(--col-w);position:relative;flex-shrink:0;z-index:1}
+  .col:hover{z-index:500}
+  .line{position:absolute;left:50%;transform:translateX(-50%);width:2.5px;background:var(--ink)}
+  .line.dead{background:var(--gray)}
+  .line.absent{background:var(--alive-green)}
+  .circle{
+    position:absolute;left:50%;width:22px;height:22px;border-radius:50%;
+    border:2.5px solid var(--ink);background:var(--bg);
+    transform:translate(-50%,-50%);cursor:pointer;
+  }
+  .circle.dead{border-color:var(--gray)}
+  .circle.death-mark{background:var(--gray);border-color:var(--gray)}
+  .circle.absent-mark{background:var(--alive-green);border-color:var(--alive-green)}
+  .circle:hover{background:#fffbe6}
+  .circle.death-mark:hover,.circle.absent-mark:hover{filter:brightness(1.1)}
+  .tooltip{
+    position:absolute;left:26px;top:-2px;background:#e8e8e8;color:#111;
+    padding:6px 12px;font-size:12px;border-radius:6px;white-space:nowrap;
+    display:none;font-family:system-ui,sans-serif;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);pointer-events:none;
+  }
+  .circle:hover .tooltip{display:block}
+
+  /* ===== Editor Modal ===== */
+  #modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:200}
+  #modal-bg.open{display:flex}
+  #modal{
+    background:#fff;border-radius:18px;padding:36px 42px 30px;width:560px;
+    font-family:"Noto Serif TC","Songti TC",serif;max-height:92vh;overflow-y:auto;
+    box-shadow:0 20px 60px rgba(0,0,0,.2);
+  }
+  .ed-top{display:flex;align-items:flex-start;gap:28px;margin-bottom:8px}
+  .ed-name-wrap{position:relative;min-width:140px}
+  .ed-name-display{
+    font-size:46px;font-weight:900;letter-spacing:4px;
+    padding:4px 10px;cursor:pointer;border-radius:8px;
+    min-height:60px;display:flex;align-items:center;
+    transition:background .15s;color:#111;
+  }
+  .ed-name-display:hover{background:#f0f0f0}
+  .ed-name-display:hover::after{
+    content:"點兩下編輯";font-size:11px;color:#888;margin-left:10px;font-weight:400;letter-spacing:0;
+  }
+  .ed-name-display.empty{color:#bbb}
+  .ed-name-input{
+    font-size:36px;font-weight:900;letter-spacing:4px;
+    border:1.5px solid #333;border-radius:8px;padding:6px 12px;
+    font-family:"Noto Serif TC","Songti TC",serif;outline:none;
+    width:220px;background:#fff8e1;
+  }
+  .ed-top-right{flex:1;display:flex;flex-direction:column;gap:14px;padding-top:12px}
+  .ed-checks{display:flex;gap:24px}
+  .ed-check{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;cursor:pointer;user-select:none;font-family:"Noto Serif TC",serif}
+  .ed-check input{width:18px;height:18px;cursor:pointer;accent-color:#111}
+  .ed-check.death{color:var(--fail-red)}
+  .ed-check.absent{color:var(--alive-green)}
+  .ed-debut{display:flex;align-items:center;gap:10px;font-size:15px;font-family:"Noto Serif TC",serif;font-weight:700}
+  .ed-debut input{
+    width:64px;border:1.5px solid #333;border-radius:6px;padding:4px 8px;
+    font-size:15px;text-align:center;font-family:inherit;outline:none;
+    -moz-appearance:textfield;
+  }
+  .ed-debut input::-webkit-outer-spin-button,.ed-debut input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+  .ed-divider{border:none;border-top:1.5px solid #222;margin:22px 0 18px}
+
+  .ed-fail-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .ed-fail-head h3{font-size:18px;font-weight:800;font-family:"Noto Serif TC",serif}
+  .ed-add-btn{
+    width:26px;height:26px;border-radius:50%;border:1.5px solid #333;
+    background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    font-size:18px;color:#333;transition:.15s;
+  }
+  .ed-add-btn:hover{background:#111;color:#fff}
+
+  .ed-fail-list{
+    background:#f5f5f5;border-radius:10px;padding:14px 18px;
+    max-height:320px;overflow-y:auto;font-family:"Noto Serif TC","Songti TC",serif;
+  }
+  .ed-fail-list.scroll-on{max-height:320px}
+  .ed-empty{color:#aaa;font-size:14px;text-align:center;padding:14px 0}
+  .fail-item{
+    display:flex;align-items:center;gap:8px;padding:8px 0;
+    border-bottom:1px solid #e5e5e5;font-size:15px;font-weight:700;
+  }
+  .fail-item:last-child{border-bottom:none}
+  .fail-item .fi-text{flex:1;line-height:1.5}
+  .fail-item.type-death{color:var(--fail-red)}
+  .fail-item.type-absent{color:var(--alive-green)}
+  .fail-item.type-fail{color:#111}
+  .fi-icon{
+    width:26px;height:26px;border:none;background:transparent;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;border-radius:5px;color:#666;
+  }
+  .fi-icon:hover{background:#eaeaea;color:#111}
+  .fi-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+
+  .fi-form{
+    display:flex;gap:8px;align-items:center;padding:10px 0;
+    border-bottom:1px solid #e5e5e5;
+  }
+  .fi-form input[type=number]{
+    width:56px;border:1.5px solid #333;border-radius:6px;padding:4px 6px;
+    font-size:14px;text-align:center;font-family:inherit;outline:none;
+    -moz-appearance:textfield;
+  }
+  .fi-form input[type=number]::-webkit-outer-spin-button,.fi-form input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .fi-form input[type=text]{
+    flex:1;border:1.5px solid #333;border-radius:6px;padding:5px 10px;
+    font-size:14px;font-family:inherit;outline:none;
+  }
+  .fi-form .fi-label{font-size:14px;font-weight:700;white-space:nowrap}
+  .fi-form.type-death .fi-label,.fi-form.type-death input{border-color:var(--fail-red);color:var(--fail-red)}
+  .fi-form.type-absent .fi-label,.fi-form.type-absent input{border-color:var(--alive-green);color:var(--alive-green)}
+  .fi-form button{
+    border:none;background:#111;color:#fff;border-radius:6px;padding:6px 14px;
+    font-size:13px;cursor:pointer;font-family:inherit;
+  }
+  .fi-form button.ghost{background:#ddd;color:#333}
+
+  .fi-confirm{
+    display:flex;gap:6px;align-items:center;padding:8px 0;
+    border-bottom:1px solid #e5e5e5;font-size:13px;color:#c00;
+  }
+  .fi-confirm .fc-txt{flex:1}
+  .fi-confirm button{border:none;border-radius:5px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit}
+  .fi-confirm .yes{background:#c00;color:#fff}
+  .fi-confirm .no{background:#eee;color:#333}
+
+  .ed-actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+  .ed-actions .right{display:flex;gap:10px}
+  .ed-btn{border:none;padding:11px 26px;border-radius:8px;cursor:pointer;font-size:15px;font-family:"Noto Serif TC",serif;font-weight:700}
+  .ed-btn.primary{background:#111;color:#fff}
+  .ed-btn.ghost{background:#e5e5e5;color:#333}
+  .ed-btn.danger{background:#fff;color:var(--fail-red);border:1.5px solid var(--fail-red)}
+
+  /* ===== Viewer read-only modal ===== */
+  .view-head{display:flex;flex-direction:column;gap:14px;margin-bottom:8px}
+  .view-name{
+    font-size:46px;font-weight:900;letter-spacing:4px;color:#111;
+    padding:4px 0;
+  }
+  .view-meta{display:flex;gap:14px;align-items:center;font-size:15px;color:#444;flex-wrap:wrap}
+  .view-meta strong{font-size:18px;color:#111}
+  .view-badge{
+    display:inline-block;padding:3px 12px;border-radius:20px;
+    font-size:13px;font-weight:700;letter-spacing:1px;
+  }
+  .view-badge-dead{background:#fbe8e8;color:var(--fail-red)}
+  .view-badge-absent{background:#e4f3ea;color:var(--alive-green)}
+  .view-fail-heading{font-size:18px;font-weight:800;font-family:"Noto Serif TC",serif;margin-bottom:12px}
+  .view-fail-list{
+    background:#f5f5f5;border-radius:10px;padding:14px 18px;
+    max-height:340px;overflow-y:auto;font-family:"Noto Serif TC","Songti TC",serif;
+  }
+  .view-fail-item{
+    padding:10px 0;border-bottom:1px solid #e5e5e5;
+    font-size:15px;font-weight:700;line-height:1.6;
+  }
+  .view-fail-item:last-child{border-bottom:none}
+  .view-fail-item.type-death{color:var(--fail-red)}
+  .view-fail-item.type-absent{color:var(--alive-green)}
+  .view-fail-item.type-fail{color:#111}
+  .view-empty{color:#aaa;font-size:14px;text-align:center;padding:14px 0}
+  .view-actions{display:flex;justify-content:flex-end;margin-top:22px}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>失敗者的三國</h1>
+  <button class="icon-btn" id="filter-btn" title="篩選">
+    <svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="2"/><line x1="2" y1="7" x2="5" y2="7"/><line x1="9" y1="7" x2="22" y2="7"/><circle cx="17" cy="17" r="2"/><line x1="2" y1="17" x2="15" y2="17"/><line x1="19" y1="17" x2="22" y2="17"/></svg>
+  </button>
+  <input id="searchbox" type="text" placeholder="搜尋人物名稱…">
+  <div id="filter-panel">
+    <label><input type="checkbox" id="f-dead"> 不顯示<span style="color:var(--fail-red);font-weight:700">「已死亡/退場」</span>人物</label>
+    <label><input type="checkbox" id="f-absent"> 不顯示<span style="color:var(--alive-green);font-weight:700">「暫時中離」</span>人物</label>
+    <hr>
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#333;margin-bottom:10px">
+      <span style="font-weight:700">顯示章回範圍</span>
+      <button id="f-range-reset" title="重設範圍" style="width:24px;height:24px;border:none;background:transparent;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#555">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:14px">
+      第 <input type="text" inputmode="numeric" id="f-lo" value="1" style="width:64px;border:1.5px solid #333;border-radius:6px;padding:6px 8px;font-size:14px;text-align:center;font-family:inherit;outline:none">
+      回 ～ 第
+      <input type="text" inputmode="numeric" id="f-hi" value="120" style="width:64px;border:1.5px solid #333;border-radius:6px;padding:6px 8px;font-size:14px;text-align:center;font-family:inherit;outline:none">
+      回
+    </div>
+    <hr>
+    <div style="display:flex;justify-content:flex-end">
+      <button id="f-reorder-btn" class="reorder-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6.5a1.5 1.5 0 0 0-3 0V11"/><path d="M15 11V4.5a1.5 1.5 0 0 0-3 0V11"/><path d="M12 11V5.5a1.5 1.5 0 0 0-3 0V11"/><path d="M9 11V8.5a1.5 1.5 0 1 0-3 0v7a6 6 0 0 0 6 6h2a6 6 0 0 0 6-6V11a1.5 1.5 0 0 0-3 0"/></svg>
+        <span>移動人物名牌</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="grid-wrap">
+  <div id="grid">
+    <div id="rows"></div>
+    <div id="cols"></div>
+    <div id="chapters"></div>
+    <div id="names"></div>
+    <div id="corner"></div>
+  </div>
+</div>
+
+<div id="modal-bg">
+  <div id="modal">
+    <div class="view-head">
+      <div class="view-name" id="view-name"></div>
+      <div class="view-meta" id="view-meta"></div>
+    </div>
+    <hr class="ed-divider">
+    <h3 class="view-fail-heading">失敗紀錄</h3>
+    <div class="view-fail-list" id="view-fail-list"></div>
+    <div class="view-actions">
+      <button class="ed-btn primary" id="view-close">關閉</button>
+    </div>
+  </div>
+</div>
+
+<div id="load-error" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:30px 40px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.15);font-family:'Noto Serif TC',serif;font-size:16px;color:#c00;z-index:500;text-align:center;">
+  <div style="font-size:20px;font-weight:800;margin-bottom:8px">無法載入資料</div>
+  <div style="color:#666;font-size:14px;font-weight:400">請稍後重新整理頁面試試</div>
+</div>
+
+<script>
+const STORAGE_KEY = "losers_three_kingdoms_v4";
+const TOTAL_CHAPTERS = 120;
+const ROW_H = 64, COL_W = 54, NAME_H = 120, CHAP_W = 100, GRID_PAD_LEFT = 150;
+
+let data = { characters: [] };
+let editingId = null;
+let editingDraft = null;
+let searchTerm = "";
+let filterDead = false;
+let filterAbsent = false;
+let reorderMode = false;
+let rangeLo = 1, rangeHi = TOTAL_CHAPTERS;
+let inlineState = null;
+let pendingDelete = null;
+let nameEditing = false;
+
+const SEED = { characters: [] };
+
+async function loadData(){
+  try{
+    const res = await fetch("./data.json?t=" + Date.now(), {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const parsed = await res.json();
+    if(!parsed || !Array.isArray(parsed.characters)) throw new Error("格式錯誤");
+    data = { characters: parsed.characters };
+  }catch(e){
+    console.error("load failed", e);
+    document.getElementById("load-error").style.display = "block";
+    data = { characters: [] };
+  }
+}
+async function saveData(){ /* viewer is read-only; no persistence */ }
+
+// Derived helpers
+function getDeath(c){ return (c.failures||[]).find(f=>f.type==="death"); }
+function getAbsent(c){ return (c.failures||[]).find(f=>f.type==="absent"); }
+function isDead(c){ return !!getDeath(c); }
+function isAbsent(c){ return !isDead(c) && !!getAbsent(c); }
+function endChap(c){
+  const d = getDeath(c); if(d) return d.chap;
+  const a = getAbsent(c); if(a) return a.chap;
+  return null;
+}
+
+function chapLabel(n){
+  return "第 " + n + " 回";
+}
+
+function render(){
+  const lo = rangeLo, hi = rangeHi;
+  const span = hi - lo + 1;
+
+  const chapEl = document.getElementById("chapters");
+  chapEl.innerHTML = "";
+  for(let i=lo;i<=hi;i++){
+    const d = document.createElement("div");
+    d.className = "chap-row";
+    d.textContent = chapLabel(i);
+    chapEl.appendChild(d);
+  }
+
+  const rowsEl = document.getElementById("rows");
+  rowsEl.innerHTML = "";
+  for(let i=0;i<span;i++){
+    const r = document.createElement("div");
+    r.className = "row-line";
+    rowsEl.appendChild(r);
+  }
+
+  const visible = data.characters.filter(c=>{
+    if(filterDead && isDead(c)) return false;
+    if(filterAbsent && isAbsent(c)) return false;
+    if(c.debut > hi) return false;
+    const ec = endChap(c);
+    if(ec != null && ec < lo) return false;
+    return true;
+  });
+
+  const namesEl = document.getElementById("names");
+  namesEl.innerHTML = "";
+  namesEl.style.width = (visible.length * COL_W + COL_W + 20) + "px";
+  visible.forEach((c)=>{
+    const cell = document.createElement("div");
+    cell.className = "name-cell";
+    cell.dataset.id = c.id;
+    const np = document.createElement("div");
+    np.className = "nameplate";
+    if(isDead(c)) np.classList.add("dead");
+    else if(isAbsent(c)) np.classList.add("absent");
+    np.textContent = c.name;
+    np.dataset.id = c.id;
+    np.addEventListener("dblclick",(e)=>{ e.stopPropagation(); openInfoCard(c.id); });
+    if(reorderMode){
+      np.draggable = true;
+      np.addEventListener("dragstart",onDragStart);
+      np.addEventListener("dragend",onDragEnd);
+    }
+    if(searchTerm){
+      if(c.name.includes(searchTerm)) np.classList.add("highlight");
+      else np.classList.add("dim");
+    }
+    cell.appendChild(np);
+    if(reorderMode){
+      cell.addEventListener("dragover",onDragOver);
+      cell.addEventListener("dragleave",onDragLeave);
+      cell.addEventListener("drop",onDrop);
+    }
+    namesEl.appendChild(cell);
+  });
+
+  const colsEl = document.getElementById("cols");
+  colsEl.innerHTML = "";
+  const colsHeight = span * ROW_H;
+  rowsEl.style.width = (visible.length * COL_W + COL_W + 20) + "px";
+  colsEl.style.width = (visible.length * COL_W) + "px";
+
+  visible.forEach(c=>{
+    const col = document.createElement("div");
+    col.className = "col";
+    col.style.height = colsHeight + "px";
+
+    const ec = endChap(c);
+    // compute the visible portion of the line
+    const lineStartChap = Math.max(c.debut, lo);
+    const lineEndChap = ec != null ? Math.min(ec, hi) : hi;
+
+    if(lineStartChap <= lineEndChap){
+      const topPx = (lineStartChap - lo) * ROW_H;
+      const bottomPx = (lineEndChap - lo + 0.5) * ROW_H;
+      const line = document.createElement("div");
+      line.className = "line";
+      if(isDead(c)) line.classList.add("dead");
+      else if(isAbsent(c)) line.classList.add("absent");
+      line.style.top = topPx + "px";
+      line.style.height = (bottomPx - topPx) + "px";
+      col.appendChild(line);
+    }
+
+    (c.failures||[]).forEach(f=>{
+      if(f.chap < lo || f.chap > hi) return;
+      const ci = document.createElement("div");
+      ci.className = "circle";
+      if(isDead(c) && f.type!=="death") ci.classList.add("dead");
+      if(f.type==="death") ci.classList.add("death-mark");
+      if(f.type==="absent") ci.classList.add("absent-mark");
+      ci.style.top = ((f.chap - lo + 0.5) * ROW_H) + "px";
+      const tip = document.createElement("div");
+      tip.className = "tooltip";
+      const prefix = f.type==="death"?"【退場】":(f.type==="absent"?"【中離】":"");
+      tip.textContent = "第 "+f.chap+" 回："+prefix + f.reason;
+      ci.appendChild(tip);
+      col.appendChild(ci);
+    });
+
+    if(searchTerm && !c.name.includes(searchTerm)) col.classList.add("dim");
+    colsEl.appendChild(col);
+  });
+
+  const totalW = Math.max(window.innerWidth, GRID_PAD_LEFT + CHAP_W + (visible.length + 2) * COL_W + 60);
+  const totalH = NAME_H + colsHeight + 120;
+  const grid = document.getElementById("grid");
+  grid.style.width = totalW + "px";
+  grid.style.height = totalH + "px";
+
+  updateStickyPositions();
+}
+
+// Drag-reorder
+let dragId = null;
+function onDragStart(e){ dragId=e.target.dataset.id; e.target.classList.add("dragging"); e.dataTransfer.effectAllowed="move"; e.dataTransfer.setData("text/plain",dragId); }
+function onDragEnd(e){ e.target.classList.remove("dragging"); dragId=null; }
+function onDragOver(e){ e.preventDefault(); e.currentTarget.classList.add("drop-target"); }
+function onDragLeave(e){ e.currentTarget.classList.remove("drop-target"); }
+async function onDrop(e){
+  e.preventDefault();
+  e.currentTarget.classList.remove("drop-target");
+  const targetId = e.currentTarget.dataset.id;
+  const srcId = dragId || e.dataTransfer.getData("text/plain");
+  if(!srcId || srcId===targetId) return;
+  const fromIdx = data.characters.findIndex(c=>c.id===srcId);
+  const toIdx = data.characters.findIndex(c=>c.id===targetId);
+  if(fromIdx<0||toIdx<0) return;
+  const [moved] = data.characters.splice(fromIdx,1);
+  data.characters.splice(toIdx,0,moved);
+  await saveData();
+  render();
+}
+
+
+// ===== Read-only info card =====
+function openInfoCard(id){
+  const c = data.characters.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById("view-name").textContent = c.name;
+
+  const meta = document.getElementById("view-meta");
+  meta.innerHTML = "";
+  const debut = document.createElement("span");
+  debut.innerHTML = "登場：第 <strong>" + c.debut + "</strong> 回";
+  meta.appendChild(debut);
+  if(isDead(c)){
+    const d = getDeath(c);
+    const badge = document.createElement("span");
+    badge.className = "view-badge view-badge-dead";
+    badge.textContent = "已退場 · 第 " + d.chap + " 回";
+    meta.appendChild(badge);
+  } else if(isAbsent(c)){
+    const a = getAbsent(c);
+    const badge = document.createElement("span");
+    badge.className = "view-badge view-badge-absent";
+    badge.textContent = "暫時中離 · 第 " + a.chap + " 回";
+    meta.appendChild(badge);
+  }
+
+  const list = document.getElementById("view-fail-list");
+  list.innerHTML = "";
+  const sorted = [...(c.failures||[])].sort((a,b)=>a.chap-b.chap);
+  if(sorted.length===0){
+    list.innerHTML = '<div class="view-empty">（尚無紀錄）</div>';
+  } else {
+    sorted.forEach(f=>{
+      const row = document.createElement("div");
+      row.className = "view-fail-item type-" + f.type;
+      const prefix = f.type==="death" ? "【退場】" : (f.type==="absent" ? "【中離】" : "");
+      row.textContent = "第 " + f.chap + " 回：" + prefix + f.reason;
+      list.appendChild(row);
+    });
+  }
+
+  document.getElementById("modal-bg").classList.add("open");
+}
+function closeInfoCard(){
+  document.getElementById("modal-bg").classList.remove("open");
+}
+document.getElementById("view-close").onclick = closeInfoCard;
+document.getElementById("modal-bg").onclick = (e)=>{ if(e.target.id==="modal-bg") closeInfoCard(); };
+
+
+// Search & filter
+document.getElementById("searchbox").addEventListener("input",(e)=>{ searchTerm=e.target.value.trim(); render(); });
+document.getElementById("filter-btn").onclick = ()=>{ document.getElementById("filter-panel").classList.toggle("open"); };
+document.getElementById("f-dead").onchange = (e)=>{ filterDead=e.target.checked; render(); };
+document.getElementById("f-absent").onchange = (e)=>{ filterAbsent=e.target.checked; render(); };
+function applyRange(){
+  let lo = parseInt(document.getElementById("f-lo").value) || 1;
+  let hi = parseInt(document.getElementById("f-hi").value) || TOTAL_CHAPTERS;
+  lo = Math.max(1, Math.min(TOTAL_CHAPTERS, lo));
+  hi = Math.max(1, Math.min(TOTAL_CHAPTERS, hi));
+  if(lo > hi) [lo, hi] = [hi, lo];
+  rangeLo = lo; rangeHi = hi;
+  render();
+}
+document.getElementById("f-lo").addEventListener("change", applyRange);
+document.getElementById("f-hi").addEventListener("change", applyRange);
+document.getElementById("f-range-reset").onclick = ()=>{
+  document.getElementById("f-lo").value = 1;
+  document.getElementById("f-hi").value = TOTAL_CHAPTERS;
+  rangeLo = 1; rangeHi = TOTAL_CHAPTERS;
+  render();
+};
+document.getElementById("f-reorder-btn").onclick = ()=>{
+  reorderMode = !reorderMode;
+  document.body.classList.toggle("reorder", reorderMode);
+  document.getElementById("f-reorder-btn").classList.toggle("active", reorderMode);
+  render();
+};
+
+
+function updateStickyPositions(){
+  const w = document.getElementById("grid-wrap");
+  const top = w.scrollTop, left = w.scrollLeft;
+  document.getElementById("names").style.top = top + "px";
+  document.getElementById("chapters").style.left = left + "px";
+  const corner = document.getElementById("corner");
+  corner.style.top = top + "px";
+  corner.style.left = left + "px";
+}
+document.getElementById("grid-wrap").addEventListener("scroll", updateStickyPositions);
+window.addEventListener("resize", ()=>render());
+
+(async ()=>{
+  await loadData();
+  render();
+})();
+</script>
+</body>
+</html>
