@@ -1,5 +1,300 @@
 {
   "version": 1,
-  "exportedAt": "2026-01-01T00:00:00.000Z",
-  "characters": []
+  "exportedAt": "2026-04-09T15:36:50.189Z",
+  "characters": [
+    {
+      "id": "c1775745435618",
+      "name": "漢桓帝",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "駕崩",
+          "type": "death"
+        }
+      ]
+    },
+    {
+      "id": "c1775747343122",
+      "name": "漢靈帝",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747352332",
+      "name": "竇武",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "密謀誅殺宦官失敗",
+          "type": "death"
+        }
+      ]
+    },
+    {
+      "id": "c1775747393100",
+      "name": "陳蕃",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "密謀誅殺宦官失敗",
+          "type": "death"
+        }
+      ]
+    },
+    {
+      "id": "c1775747444446",
+      "name": "蔡邕",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "曹節進讒言，導致開除",
+          "type": "absent"
+        }
+      ]
+    },
+    {
+      "id": "c1775747420766",
+      "name": "曹節",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747529095",
+      "name": "張讓",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747534041",
+      "name": "趙忠",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747542227",
+      "name": "封諝",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "私通黃巾軍馬元義，被何進下獄",
+          "type": "death"
+        }
+      ]
+    },
+    {
+      "id": "c1775747624307",
+      "name": "段珪",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747628894",
+      "name": "侯覽",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747642098",
+      "name": "蹇碩",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747650845",
+      "name": "程曠",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747671211",
+      "name": "夏惲",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747721931",
+      "name": "郭勝",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747780585",
+      "name": "張角",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747784935",
+      "name": "張寶",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747789065",
+      "name": "張梁",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775747803661",
+      "name": "南華老仙",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "給完《太平要術》就閃了",
+          "type": "death"
+        }
+      ]
+    },
+    {
+      "id": "c1775747862502",
+      "name": "馬元義",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "與封諝結交，事跡敗露被斬",
+          "type": "death"
+        }
+      ]
+    },
+    {
+      "id": "c1775748023980",
+      "name": "唐州",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "舉報馬元義跟張角",
+          "type": "death"
+        }
+      ]
+    },
+    {
+      "id": "c1775748149276",
+      "name": "何進",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775748190538",
+      "name": "盧植",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "不願賄賂宦官，被囚車押回洛陽",
+          "type": "absent"
+        }
+      ]
+    },
+    {
+      "id": "c1775748194943",
+      "name": "皇甫嵩",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775748202418",
+      "name": "朱儁",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775748221150",
+      "name": "劉焉",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775748461791",
+      "name": "鄒靖",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "協助完劉備後，回劉焉處",
+          "type": "death"
+        }
+      ]
+    },
+    {
+      "id": "c1775748281325",
+      "name": "劉備",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775748286758",
+      "name": "張飛",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775748294267",
+      "name": "關羽",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775748333111",
+      "name": "公孫瓚",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775748411183",
+      "name": "程遠志",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "輕敵，被關羽斬成兩半",
+          "type": "death"
+        }
+      ]
+    },
+    {
+      "id": "c1775748428770",
+      "name": "鄧茂",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "輕敵，被張飛刺中心臟而亡",
+          "type": "death"
+        }
+      ]
+    },
+    {
+      "id": "c1775748660473",
+      "name": "曹操",
+      "debut": 1,
+      "failures": []
+    },
+    {
+      "id": "c1775748673215",
+      "name": "曹嵩",
+      "debut": 1,
+      "failures": [
+        {
+          "chap": 1,
+          "reason": "僅作為曹操家世背景被提及，但後面會出場",
+          "type": "absent"
+        }
+      ]
+    },
+    {
+      "id": "c1775748863089",
+      "name": "董卓",
+      "debut": 1,
+      "failures": []
+    }
+  ]
 }
