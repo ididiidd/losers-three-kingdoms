@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-04-09T19:59:16.544Z",
+  "exportedAt": "2026-04-10T12:13:41.145Z",
   "characters": [
     {
       "id": "c1775745435618",
@@ -307,14 +307,21 @@
       "id": "c1775748863089",
       "name": "董卓",
       "debut": 1,
-      "failures": []
+      "failures": [
+        {
+          "chap": 9,
+          "reason": "被連環計設局，遭呂布暗殺",
+          "type": "death"
+        }
+      ],
+      "notes": ""
     }
   ],
   "progress": {
-    "text": "第 3 回：董卓入京",
+    "text": "第 1 回：朝局亂政",
     "link": "https://youtu.be/XkXU4D6xdio",
-    "chapter": 3
+    "chapter": 2
   },
   "rangeLo": 1,
-  "rangeHi": 3
+  "rangeHi": 2
 }
