@@ -2,6 +2,8 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>失敗者的三國</title>
 <style>
   :root{
@@ -345,6 +347,303 @@
   .view-fail-item.type-fail{color:#111}
   .view-empty{color:#aaa;font-size:14px;text-align:center;padding:14px 0}
   .view-actions{display:flex;justify-content:flex-end;margin-top:22px}
+  /* ============ MOBILE STYLES ============ */
+  /* iOS safe-area + touch defaults */
+  body.mobile{
+    -webkit-text-size-adjust:100%;
+    -webkit-tap-highlight-color:transparent;
+  }
+  body.mobile *{
+    -webkit-touch-callout:none;
+  }
+  body.mobile .nameplate,
+  body.mobile .m-name,
+  body.mobile .m-chap,
+  body.mobile .m-circle,
+  body.mobile .m-sheet-name,
+  body.mobile .m-yt-marker,
+  body.mobile #m-topbar h1,
+  body.mobile #m-progress-bar{
+    -webkit-user-select:none;
+    user-select:none;
+  }
+  /* Hide desktop elements on mobile */
+  body.mobile #topbar,
+  body.mobile #grid-wrap,
+  body.mobile #modal-bg{
+    display:none !important;
+  }
+  /* Show mobile elements only on mobile */
+  #m-root,#m-sheet-bg,#m-filter-sheet-bg{display:none}
+  body.mobile #m-root{display:block}
+
+  /* Mobile topbar */
+  #m-topbar{
+    position:fixed;top:0;left:0;right:0;z-index:60;
+    background:var(--bg);padding:14px 18px 10px;
+    padding-top:max(14px,env(safe-area-inset-top));
+    border-bottom:1px solid #e0e0e0;
+  }
+  #m-topbar .m-top-row{display:flex;align-items:center;gap:12px}
+  #m-topbar h1{font-size:26px;font-weight:900;letter-spacing:2px;flex:1;min-width:0}
+  #m-topbar .m-icon-btn{
+    width:44px;height:44px;border:none;background:transparent;
+    border-radius:12px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;flex-shrink:0;
+  }
+  #m-topbar .m-icon-btn:active{background:#e0e0e0}
+  #m-topbar .m-icon-btn svg{width:24px;height:24px;stroke:#111;fill:none;stroke-width:2}
+
+  #m-progress-bar{
+    margin-top:10px;background:#e6e6e6;border-radius:10px;
+    padding:10px 14px;font-size:13px;color:#333;line-height:1.5;
+  }
+  #m-progress-bar.empty{display:none}
+  #m-progress-bar .m-pb-label{font-weight:800;color:#111}
+  #m-progress-bar a{color:#0a66c2;text-decoration:none;font-weight:700}
+
+  #m-hint{
+    margin-top:8px;font-size:11px;color:#888;text-align:center;
+  }
+
+  /* Mobile grid scroll */
+  #m-scroll{
+    position:fixed;left:0;right:0;bottom:0;
+    top:var(--m-header-h,140px);
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  #m-content{
+    position:relative;
+    width:max-content;
+  }
+  /* Header row (chapters) - sticky top */
+  .m-header-row{
+    display:flex;position:sticky;top:0;z-index:20;
+    background:var(--bg);border-bottom:1.5px solid #ccc;
+  }
+  .m-corner{
+    width:84px;min-width:84px;height:46px;
+    position:sticky;left:0;z-index:40;
+    background:var(--bg);border-right:1.5px solid #ccc;
+  }
+  .m-chap{
+    width:56px;min-width:56px;height:46px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:700;color:#333;
+    position:relative;
+  }
+  .m-chap.current{background:#fff4e6;font-weight:900;color:#111}
+  .m-yt-marker{
+    position:absolute;top:4px;left:50%;transform:translateX(-50%);
+    width:20px;height:14px;background:#FF0000;border-radius:3px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .m-yt-marker::after{
+    content:"";display:block;
+    border-left:6px solid #fff;
+    border-top:4px solid transparent;
+    border-bottom:4px solid transparent;
+    margin-left:2px;
+  }
+  .m-chap.current .m-chap-num{margin-top:14px}
+  /* Character rows */
+  .m-row{
+    display:flex;height:54px;
+    border-bottom:1px dashed #dcdcdc;
+  }
+  .m-name{
+    width:84px;min-width:84px;height:54px;
+    position:sticky;left:0;z-index:10;
+    background:var(--ink);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;font-weight:800;letter-spacing:2px;
+    border-right:1.5px solid #ccc;
+    cursor:pointer;
+  }
+  .m-name.dead{background:var(--gray)}
+  .m-name.absent{background:var(--alive-green)}
+  .m-name:active{filter:brightness(1.2)}
+  .m-name .m-name-bg{
+    position:absolute;inset:6px 4px;border-radius:6px;
+    background:inherit;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 4px rgba(0,0,0,.12);
+  }
+  .m-track{position:relative;height:54px}
+  .m-line{
+    position:absolute;top:50%;height:3px;background:var(--ink);
+    transform:translateY(-50%);
+  }
+  .m-line.dead{background:var(--gray)}
+  .m-line.absent{background:var(--alive-green)}
+  .m-circle{
+    position:absolute;top:50%;width:26px;height:26px;border-radius:50%;
+    border:3px solid var(--ink);background:var(--bg);
+    transform:translate(-50%,-50%);
+    touch-action:manipulation;
+  }
+  .m-circle.dead{border-color:var(--gray)}
+  .m-circle.death-mark{background:var(--fail-red);border-color:var(--fail-red)}
+  .m-circle.absent-mark{background:var(--alive-green);border-color:var(--alive-green)}
+  .m-circle::after{
+    content:"";position:absolute;inset:-12px;border-radius:50%;
+  }
+  .m-circle.pressed{transform:translate(-50%,-50%) scale(1.25)}
+
+  /* Long-press tooltip */
+  #m-tooltip{
+    position:fixed;background:#111;color:#fff;
+    padding:10px 14px;border-radius:10px;font-size:14px;font-weight:700;
+    font-family:"Noto Serif TC",serif;white-space:nowrap;
+    pointer-events:none;z-index:1000;
+    box-shadow:0 6px 20px rgba(0,0,0,.3);
+    display:none;
+  }
+  #m-tooltip.show{display:block}
+  #m-tooltip::after{
+    content:"";position:absolute;bottom:-6px;left:50%;
+    transform:translateX(-50%);
+    border-left:7px solid transparent;border-right:7px solid transparent;
+    border-top:7px solid #111;
+  }
+
+  /* Bottom sheet for info card */
+  #m-sheet-bg{
+    position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;
+    align-items:flex-end;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .25s;
+  }
+  #m-sheet-bg.open{display:flex;opacity:1;pointer-events:auto}
+  #m-sheet{
+    width:100%;max-height:78vh;background:#fff;
+    border-radius:22px 22px 0 0;padding:10px 24px 30px;
+    padding-bottom:max(30px,env(safe-area-inset-bottom));
+    overflow-y:auto;
+    transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.9,.3,1);
+    -webkit-overflow-scrolling:touch;
+  }
+  #m-sheet-bg.open #m-sheet{transform:translateY(0)}
+  .m-sheet-handle{
+    width:44px;height:5px;background:#d0d0d0;border-radius:3px;
+    margin:6px auto 16px;
+  }
+  .m-sheet-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:14px}
+  .m-sheet-name{
+    font-size:38px;font-weight:900;letter-spacing:3px;color:#111;
+    line-height:1.1;flex-shrink:0;
+  }
+  .m-sheet-right{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0}
+  .m-sheet-debut{font-size:13px;color:#666;font-weight:700}
+  .m-sheet-debut strong{font-size:16px;color:#111;margin:0 2px}
+  .m-sheet-badges{display:flex;gap:8px;flex-wrap:wrap}
+  .m-sheet-badge{
+    display:inline-block;padding:5px 14px;border-radius:20px;
+    font-size:13px;font-weight:700;letter-spacing:1px;
+  }
+  .m-sheet-badge.dead{background:#fbe8e8;color:var(--fail-red)}
+  .m-sheet-badge.absent{background:#e4f3ea;color:var(--alive-green)}
+  .m-sheet-notes{
+    background:#f0f0f0;border-radius:12px;padding:14px 18px;
+    font-size:15px;color:#333;line-height:1.7;margin-bottom:18px;
+  }
+  .m-sheet-notes:empty::before{
+    content:"（尚無備註）";color:#bbb;font-style:italic;font-size:14px;
+  }
+  .m-sheet-fail-heading{
+    font-size:17px;font-weight:800;margin-bottom:10px;color:#111;
+  }
+  .m-sheet-fail-list{
+    background:#f5f5f5;border-radius:12px;padding:4px 18px;margin-bottom:20px;
+  }
+  .m-sheet-fail-item{
+    padding:12px 0;border-bottom:1px solid #e5e5e5;
+    font-size:15px;font-weight:700;line-height:1.6;
+  }
+  .m-sheet-fail-item:last-child{border-bottom:none}
+  .m-sheet-fail-item.type-death{color:var(--fail-red)}
+  .m-sheet-fail-item.type-absent{color:var(--alive-green)}
+  .m-sheet-fail-item.type-fail{color:#111}
+  .m-sheet-empty{color:#aaa;font-size:14px;text-align:center;padding:14px 0}
+  .m-sheet-close{
+    width:100%;background:#111;color:#fff;border:none;
+    padding:16px;font-size:17px;font-weight:700;border-radius:14px;
+    font-family:inherit;cursor:pointer;
+  }
+  .m-sheet-close:active{background:#333}
+
+  /* Mobile filter sheet */
+  #m-filter-sheet-bg{
+    position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:180;
+    align-items:flex-end;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .25s;
+  }
+  #m-filter-sheet-bg.open{display:flex;opacity:1;pointer-events:auto}
+  #m-filter-sheet{
+    width:100%;background:#fff;border-radius:22px 22px 0 0;
+    padding:10px 24px 30px;
+    padding-bottom:max(30px,env(safe-area-inset-bottom));
+    transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.9,.3,1);
+    max-height:78vh;overflow-y:auto;
+  }
+  #m-filter-sheet-bg.open #m-filter-sheet{transform:translateY(0)}
+  #m-filter-sheet h3{font-size:20px;font-weight:900;margin:10px 0 18px;color:#111}
+  #m-filter-sheet .m-stats{
+    display:grid;grid-template-columns:auto 1fr auto;
+    column-gap:20px;row-gap:14px;align-items:center;
+    padding:4px 0 16px;
+  }
+  #m-filter-sheet .m-stat-label{font-weight:800;color:#111;font-size:15px}
+  #m-filter-sheet .m-stat-label.dead{color:var(--fail-red)}
+  #m-filter-sheet .m-stat-label.absent{color:var(--alive-green)}
+  #m-filter-sheet .m-stat-count{justify-self:end;color:#444;font-size:14px}
+  #m-filter-sheet .m-stat-count strong{font-size:17px;color:#111;margin:0 2px}
+  #m-filter-sheet .m-stat-check{
+    display:flex;align-items:center;gap:6px;font-size:13px;color:#777;
+  }
+  #m-filter-sheet .m-stat-check input{width:20px;height:20px;accent-color:#777}
+  #m-filter-sheet hr{border:none;border-top:1px solid #e5e5e5;margin:10px 0}
+  #m-filter-sheet .m-range-head{
+    display:flex;align-items:center;gap:10px;margin:10px 0 12px;
+    font-size:15px;font-weight:800;
+  }
+  #m-filter-sheet .m-range-reset{
+    width:32px;height:32px;border:none;background:transparent;cursor:pointer;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;color:#555;
+  }
+  #m-filter-sheet .m-range-reset:active{background:#eee}
+  #m-filter-sheet .m-range-row{
+    display:flex;align-items:center;gap:10px;font-size:15px;
+  }
+  #m-filter-sheet .m-range-row input{
+    width:72px;border:1.5px solid #333;border-radius:8px;
+    padding:10px 12px;font-size:16px;text-align:center;
+    font-family:inherit;outline:none;
+  }
+  .m-sheet-actions{margin-top:22px}
+
+  /* Search sheet */
+  #m-search-sheet-bg{
+    position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:180;
+    align-items:flex-start;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  #m-search-sheet-bg.open{display:flex;opacity:1;pointer-events:auto}
+  #m-search-sheet{
+    width:100%;background:#fff;padding:14px 18px;
+    padding-top:max(14px,env(safe-area-inset-top));
+    transform:translateY(-100%);transition:transform .25s;
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+  }
+  #m-search-sheet-bg.open #m-search-sheet{transform:translateY(0)}
+  #m-search-sheet .m-search-row{display:flex;gap:10px;align-items:center}
+  #m-search-sheet input{
+    flex:1;background:#f0f0f0;border:none;border-radius:22px;
+    padding:12px 18px;font-size:16px;font-family:inherit;outline:none;
+  }
+  #m-search-sheet button{
+    border:none;background:transparent;color:#333;
+    font-size:15px;padding:10px 6px;font-family:inherit;cursor:pointer;
+  }
 </style>
 </head>
 <body>
@@ -440,6 +739,98 @@
   <div style="color:#666;font-size:14px;font-weight:400">請稍後重新整理頁面試試</div>
 </div>
 
+<!-- ============ MOBILE VIEW ============ -->
+<div id="m-root">
+  <div id="m-topbar">
+    <div class="m-top-row">
+      <h1>失敗者的三國</h1>
+      <button class="m-icon-btn" id="m-filter-btn" title="篩選">
+        <svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="2"/><line x1="2" y1="7" x2="5" y2="7"/><line x1="9" y1="7" x2="22" y2="7"/><circle cx="17" cy="17" r="2"/><line x1="2" y1="17" x2="15" y2="17"/><line x1="19" y1="17" x2="22" y2="17"/></svg>
+      </button>
+      <button class="m-icon-btn" id="m-search-btn" title="搜尋">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg>
+      </button>
+    </div>
+    <div id="m-progress-bar" class="empty"></div>
+    <div id="m-hint">👆 點名牌查看資訊　｜　長按圓圈查看失敗原因</div>
+  </div>
+
+  <div id="m-scroll">
+    <div id="m-content">
+      <div class="m-header-row" id="m-header-row"></div>
+      <div id="m-rows"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile info card bottom sheet -->
+<div id="m-sheet-bg">
+  <div id="m-sheet">
+    <div class="m-sheet-handle"></div>
+    <div class="m-sheet-head">
+      <div class="m-sheet-name" id="m-sheet-name"></div>
+      <div class="m-sheet-right">
+        <div class="m-sheet-debut" id="m-sheet-debut"></div>
+        <div class="m-sheet-badges" id="m-sheet-badges"></div>
+      </div>
+    </div>
+    <div class="m-sheet-notes" id="m-sheet-notes"></div>
+    <div class="m-sheet-fail-heading">失敗紀錄</div>
+    <div class="m-sheet-fail-list" id="m-sheet-fail-list"></div>
+    <button class="m-sheet-close" id="m-sheet-close">關閉</button>
+  </div>
+</div>
+
+<!-- Mobile filter bottom sheet -->
+<div id="m-filter-sheet-bg">
+  <div id="m-filter-sheet">
+    <div class="m-sheet-handle"></div>
+    <h3>篩選</h3>
+    <div class="m-stats">
+      <div class="m-stat-label">目前登場人物</div>
+      <div class="m-stat-count">共 <strong id="m-stat-total">0</strong> 人</div>
+      <div></div>
+
+      <div class="m-stat-label">還活躍的人物</div>
+      <div class="m-stat-count">共 <strong id="m-stat-active-count">0</strong> 人</div>
+      <label class="m-stat-check"><input type="checkbox" id="m-f-active"> 隱藏</label>
+
+      <div class="m-stat-label dead">死亡/退場人物</div>
+      <div class="m-stat-count">共 <strong id="m-stat-dead-count">0</strong> 人</div>
+      <label class="m-stat-check"><input type="checkbox" id="m-f-dead"> 隱藏</label>
+
+      <div class="m-stat-label absent">暫時中離人物</div>
+      <div class="m-stat-count">共 <strong id="m-stat-absent-count">0</strong> 人</div>
+      <label class="m-stat-check"><input type="checkbox" id="m-f-absent"> 隱藏</label>
+    </div>
+    <hr>
+    <div class="m-range-head">
+      <span>顯示章回範圍</span>
+      <button class="m-range-reset" id="m-f-range-reset" title="重設">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+    </div>
+    <div class="m-range-row">
+      第 <input type="text" inputmode="numeric" id="m-f-lo" value="1"> 回 ～ 第 <input type="text" inputmode="numeric" id="m-f-hi" value="120"> 回
+    </div>
+    <div class="m-sheet-actions">
+      <button class="m-sheet-close" id="m-filter-close">完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile search sheet -->
+<div id="m-search-sheet-bg">
+  <div id="m-search-sheet">
+    <div class="m-search-row">
+      <input type="text" id="m-searchbox" placeholder="搜尋人物名稱…">
+      <button id="m-search-cancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<div id="m-tooltip"></div>
+
 <script>
 const STORAGE_KEY = "losers_three_kingdoms_v4";
 const TOTAL_CHAPTERS = 120;
@@ -481,13 +872,17 @@ async function loadData(){
 async function saveData(){ /* viewer is read-only; no persistence */ }
 
 function renderProgressBar(){
-  const bar = document.getElementById("progress-bar");
   const p = data.progress || {text:"",link:"",chapter:null};
+  renderProgressBarInto(document.getElementById("progress-bar"), p, "pb-label");
+  renderProgressBarInto(document.getElementById("m-progress-bar"), p, "m-pb-label");
+}
+function renderProgressBarInto(bar, p, labelClass){
+  if(!bar) return;
   bar.innerHTML = "";
   if(p.text){
     bar.classList.remove("empty");
     const prefix = document.createElement("span");
-    prefix.className = "pb-label";
+    prefix.className = labelClass;
     prefix.textContent = "目前 YouTube 進度：";
     bar.appendChild(prefix);
     if(p.link){
@@ -522,16 +917,21 @@ function chapLabel(n){
   return "第 " + n + " 回";
 }
 
-function render(){
-  // Update stats
+function renderDesktop(){
+  // Update stats (both desktop and mobile elements)
   const totalCount = data.characters.length;
   const deadCount = data.characters.filter(c=>isDead(c)).length;
   const absentCount = data.characters.filter(c=>isAbsent(c)).length;
   const activeCount = totalCount - deadCount - absentCount;
-  document.getElementById("stat-total").textContent = totalCount;
-  document.getElementById("stat-active-count").textContent = activeCount;
-  document.getElementById("stat-dead-count").textContent = deadCount;
-  document.getElementById("stat-absent-count").textContent = absentCount;
+  const setStat = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  setStat("stat-total", totalCount);
+  setStat("stat-active-count", activeCount);
+  setStat("stat-dead-count", deadCount);
+  setStat("stat-absent-count", absentCount);
+  setStat("m-stat-total", totalCount);
+  setStat("m-stat-active-count", activeCount);
+  setStat("m-stat-dead-count", deadCount);
+  setStat("m-stat-absent-count", absentCount);
 
   const lo = rangeLo, hi = rangeHi;
   const span = hi - lo + 1;
@@ -682,8 +1082,321 @@ async function onDrop(e){
   render();
 }
 
+// ===== Mobile render & dispatcher =====
+let isMobile = false;
+const mobileMQ = window.matchMedia("(max-width: 768px)");
 
-// ===== Read-only info card =====
+function updateMobileMode(){
+  isMobile = mobileMQ.matches;
+  document.body.classList.toggle("mobile", isMobile);
+  if(isMobile){
+    // Compute header height dynamically for scroll container top offset
+    setTimeout(()=>{
+      const h = document.getElementById("m-topbar").offsetHeight;
+      document.documentElement.style.setProperty("--m-header-h", h + "px");
+    }, 0);
+  }
+}
+
+function render(){
+  if(isMobile){
+    renderMobile();
+  } else {
+    renderDesktop();
+  }
+}
+
+const M_COL_W = 56;
+const M_ROW_H = 54;
+const M_NAME_W = 84;
+
+function renderMobile(){
+  // Update stats (shared with desktop)
+  const totalCount = data.characters.length;
+  const deadCount = data.characters.filter(c=>isDead(c)).length;
+  const absentCount = data.characters.filter(c=>isAbsent(c)).length;
+  const activeCount = totalCount - deadCount - absentCount;
+  const setStat = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  setStat("m-stat-total", totalCount);
+  setStat("m-stat-active-count", activeCount);
+  setStat("m-stat-dead-count", deadCount);
+  setStat("m-stat-absent-count", absentCount);
+
+  const lo = rangeLo, hi = rangeHi;
+  const span = hi - lo + 1;
+
+  // Header row (chapters)
+  const headerRow = document.getElementById("m-header-row");
+  headerRow.innerHTML = "";
+  const corner = document.createElement("div");
+  corner.className = "m-corner";
+  headerRow.appendChild(corner);
+  const ytChap = data.progress && data.progress.chapter;
+  for(let i=lo;i<=hi;i++){
+    const cell = document.createElement("div");
+    cell.className = "m-chap";
+    if(i === ytChap){
+      cell.classList.add("current");
+      const yt = document.createElement("div");
+      yt.className = "m-yt-marker";
+      cell.appendChild(yt);
+    }
+    const num = document.createElement("span");
+    num.className = "m-chap-num";
+    num.textContent = i;
+    cell.appendChild(num);
+    headerRow.appendChild(cell);
+  }
+
+  // Rows
+  const visible = data.characters.filter(c=>{
+    if(filterDead && isDead(c)) return false;
+    if(filterAbsent && isAbsent(c)) return false;
+    if(filterActive && !isDead(c) && !isAbsent(c)) return false;
+    if(c.debut > hi) return false;
+    const ec = endChap(c);
+    if(ec != null && ec < lo) return false;
+    return true;
+  });
+
+  const rowsEl = document.getElementById("m-rows");
+  rowsEl.innerHTML = "";
+
+  visible.forEach(c=>{
+    const row = document.createElement("div");
+    row.className = "m-row";
+
+    const name = document.createElement("div");
+    name.className = "m-name";
+    if(isDead(c)) name.classList.add("dead");
+    else if(isAbsent(c)) name.classList.add("absent");
+    name.textContent = c.name;
+    if(searchTerm && !c.name.includes(searchTerm)) name.style.opacity = "0.15";
+    name.addEventListener("click", ()=>openInfoCardMobile(c.id));
+    row.appendChild(name);
+
+    const track = document.createElement("div");
+    track.className = "m-track";
+    track.style.width = (span * M_COL_W) + "px";
+
+    // Line
+    const lineStartChap = Math.max(c.debut, lo);
+    const ec = endChap(c);
+    const lineEndChap = ec != null ? Math.min(ec, hi) : hi;
+    if(lineStartChap <= lineEndChap){
+      const startX = (lineStartChap - lo) * M_COL_W + M_COL_W/2;
+      const endX = (lineEndChap - lo) * M_COL_W + M_COL_W/2;
+      const line = document.createElement("div");
+      line.className = "m-line";
+      if(isDead(c)) line.classList.add("dead");
+      else if(isAbsent(c)) line.classList.add("absent");
+      line.style.left = startX + "px";
+      line.style.width = Math.max(0, endX - startX) + "px";
+      track.appendChild(line);
+    }
+
+    // Circles
+    (c.failures||[]).forEach(f=>{
+      if(f.chap < lo || f.chap > hi) return;
+      const ci = document.createElement("div");
+      ci.className = "m-circle";
+      if(isDead(c) && f.type!=="death") ci.classList.add("dead");
+      if(f.type==="death") ci.classList.add("death-mark");
+      if(f.type==="absent") ci.classList.add("absent-mark");
+      ci.style.left = ((f.chap - lo) * M_COL_W + M_COL_W/2) + "px";
+      ci.dataset.chap = f.chap;
+      ci.dataset.reason = f.reason;
+      ci.dataset.type = f.type;
+      attachCircleLongPress(ci);
+      track.appendChild(ci);
+    });
+
+    if(searchTerm && !c.name.includes(searchTerm)) track.style.opacity = "0.15";
+    row.appendChild(track);
+    rowsEl.appendChild(row);
+  });
+}
+
+// Long-press on failure circles
+function attachCircleLongPress(el){
+  let timer = null;
+  let active = false;
+  const tip = document.getElementById("m-tooltip");
+  const startX = {v:0}, startY = {v:0};
+
+  const showTip = ()=>{
+    const prefix = el.dataset.type==="death" ? "【退場】" : (el.dataset.type==="absent" ? "【中離】" : "");
+    tip.textContent = "第 " + el.dataset.chap + " 回：" + prefix + el.dataset.reason;
+    tip.classList.add("show");
+    const rect = el.getBoundingClientRect();
+    tip.style.left = "0px";
+    tip.style.top = "0px";
+    // position after showing so width is known
+    requestAnimationFrame(()=>{
+      const tipRect = tip.getBoundingClientRect();
+      let left = rect.left + rect.width/2 - tipRect.width/2;
+      left = Math.max(10, Math.min(window.innerWidth - tipRect.width - 10, left));
+      const top = rect.top - tipRect.height - 12;
+      tip.style.left = left + "px";
+      tip.style.top = top + "px";
+    });
+    el.classList.add("pressed");
+    if(navigator.vibrate) try{ navigator.vibrate(15); }catch(_){}
+  };
+  const hideTip = ()=>{
+    clearTimeout(timer);
+    tip.classList.remove("show");
+    el.classList.remove("pressed");
+    active = false;
+  };
+
+  el.addEventListener("touchstart",(e)=>{
+    startX.v = e.touches[0].clientX;
+    startY.v = e.touches[0].clientY;
+    active = true;
+    timer = setTimeout(()=>{
+      if(active) showTip();
+    }, 220);
+  }, {passive:true});
+  el.addEventListener("touchmove",(e)=>{
+    const dx = e.touches[0].clientX - startX.v;
+    const dy = e.touches[0].clientY - startY.v;
+    if(Math.abs(dx) > 8 || Math.abs(dy) > 8){
+      hideTip();
+    }
+  }, {passive:true});
+  el.addEventListener("touchend", hideTip);
+  el.addEventListener("touchcancel", hideTip);
+}
+
+// Mobile info card (bottom sheet)
+function openInfoCardMobile(id){
+  const c = data.characters.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById("m-sheet-name").textContent = c.name;
+  document.getElementById("m-sheet-debut").innerHTML = "登場：第 <strong>" + c.debut + "</strong> 回";
+
+  const badges = document.getElementById("m-sheet-badges");
+  badges.innerHTML = "";
+  if(isDead(c)){
+    const d = getDeath(c);
+    const b = document.createElement("span");
+    b.className = "m-sheet-badge dead";
+    b.textContent = "已退場 · 第 " + d.chap + " 回";
+    badges.appendChild(b);
+  } else if(isAbsent(c)){
+    const a = getAbsent(c);
+    const b = document.createElement("span");
+    b.className = "m-sheet-badge absent";
+    b.textContent = "暫時中離 · 第 " + a.chap + " 回";
+    badges.appendChild(b);
+  }
+
+  document.getElementById("m-sheet-notes").textContent = c.notes || "";
+
+  const list = document.getElementById("m-sheet-fail-list");
+  list.innerHTML = "";
+  const sorted = [...(c.failures||[])].sort((a,b)=>a.chap-b.chap);
+  if(sorted.length===0){
+    list.innerHTML = '<div class="m-sheet-empty">（尚無紀錄）</div>';
+  } else {
+    sorted.forEach(f=>{
+      const row = document.createElement("div");
+      row.className = "m-sheet-fail-item type-" + f.type;
+      const prefix = f.type==="death" ? "【退場】" : (f.type==="absent" ? "【中離】" : "");
+      row.textContent = "第 " + f.chap + " 回：" + prefix + f.reason;
+      list.appendChild(row);
+    });
+  }
+
+  document.getElementById("m-sheet-bg").classList.add("open");
+  if(navigator.vibrate) try{ navigator.vibrate(10); }catch(_){}
+}
+
+// Unified entry point routing to desktop or mobile card
+function openInfoCardRouted(id){
+  if(isMobile) openInfoCardMobile(id);
+  else openInfoCard(id);
+}
+
+// Mobile sheet close handlers
+document.getElementById("m-sheet-close").onclick = ()=>{
+  document.getElementById("m-sheet-bg").classList.remove("open");
+};
+document.getElementById("m-sheet-bg").addEventListener("click",(e)=>{
+  if(e.target.id === "m-sheet-bg") document.getElementById("m-sheet-bg").classList.remove("open");
+});
+
+// Mobile filter sheet
+document.getElementById("m-filter-btn").onclick = ()=>{
+  document.getElementById("m-filter-sheet-bg").classList.add("open");
+};
+document.getElementById("m-filter-close").onclick = ()=>{
+  document.getElementById("m-filter-sheet-bg").classList.remove("open");
+};
+document.getElementById("m-filter-sheet-bg").addEventListener("click",(e)=>{
+  if(e.target.id === "m-filter-sheet-bg") document.getElementById("m-filter-sheet-bg").classList.remove("open");
+});
+document.getElementById("m-f-dead").onchange = (e)=>{ filterDead=e.target.checked; render(); };
+document.getElementById("m-f-absent").onchange = (e)=>{ filterAbsent=e.target.checked; render(); };
+document.getElementById("m-f-active").onchange = (e)=>{ filterActive=e.target.checked; render(); };
+function applyMRange(){
+  let lo = parseInt(document.getElementById("m-f-lo").value) || 1;
+  let hi = parseInt(document.getElementById("m-f-hi").value) || TOTAL_CHAPTERS;
+  lo = Math.max(1, Math.min(TOTAL_CHAPTERS, lo));
+  hi = Math.max(1, Math.min(TOTAL_CHAPTERS, hi));
+  if(lo > hi) [lo, hi] = [hi, lo];
+  rangeLo = lo; rangeHi = hi;
+  document.getElementById("m-f-lo").value = lo;
+  document.getElementById("m-f-hi").value = hi;
+  // sync desktop inputs too
+  const dLo = document.getElementById("f-lo");
+  const dHi = document.getElementById("f-hi");
+  if(dLo) dLo.value = lo;
+  if(dHi) dHi.value = hi;
+  render();
+}
+document.getElementById("m-f-lo").addEventListener("change", applyMRange);
+document.getElementById("m-f-hi").addEventListener("change", applyMRange);
+document.getElementById("m-f-range-reset").onclick = ()=>{
+  document.getElementById("m-f-lo").value = 1;
+  document.getElementById("m-f-hi").value = TOTAL_CHAPTERS;
+  rangeLo = 1; rangeHi = TOTAL_CHAPTERS;
+  const dLo = document.getElementById("f-lo");
+  const dHi = document.getElementById("f-hi");
+  if(dLo) dLo.value = 1;
+  if(dHi) dHi.value = TOTAL_CHAPTERS;
+  render();
+};
+
+// Mobile search sheet
+document.getElementById("m-search-btn").onclick = ()=>{
+  document.getElementById("m-search-sheet-bg").classList.add("open");
+  setTimeout(()=>document.getElementById("m-searchbox").focus(), 250);
+};
+document.getElementById("m-search-cancel").onclick = ()=>{
+  document.getElementById("m-search-sheet-bg").classList.remove("open");
+  document.getElementById("m-searchbox").value = "";
+  searchTerm = "";
+  render();
+};
+document.getElementById("m-search-sheet-bg").addEventListener("click",(e)=>{
+  if(e.target.id === "m-search-sheet-bg"){
+    document.getElementById("m-search-sheet-bg").classList.remove("open");
+  }
+});
+document.getElementById("m-searchbox").addEventListener("input",(e)=>{
+  searchTerm = e.target.value.trim();
+  render();
+});
+
+// Listen for viewport changes
+mobileMQ.addEventListener("change", ()=>{
+  updateMobileMode();
+  render();
+});
+
+
 function openInfoCard(id){
   const c = data.characters.find(x=>x.id===id);
   if(!c) return;
@@ -771,6 +1484,12 @@ function applyRange(){
   hi = Math.max(1, Math.min(TOTAL_CHAPTERS, hi));
   if(lo > hi) [lo, hi] = [hi, lo];
   rangeLo = lo; rangeHi = hi;
+  document.getElementById("f-lo").value = lo;
+  document.getElementById("f-hi").value = hi;
+  const mLo = document.getElementById("m-f-lo");
+  const mHi = document.getElementById("m-f-hi");
+  if(mLo) mLo.value = lo;
+  if(mHi) mHi.value = hi;
   render();
 }
 document.getElementById("f-lo").addEventListener("change", applyRange);
@@ -805,6 +1524,9 @@ window.addEventListener("resize", ()=>render());
   await loadData();
   document.getElementById("f-lo").value = rangeLo;
   document.getElementById("f-hi").value = rangeHi;
+  document.getElementById("m-f-lo").value = rangeLo;
+  document.getElementById("m-f-hi").value = rangeHi;
+  updateMobileMode();
   renderProgressBar();
   render();
 })();
