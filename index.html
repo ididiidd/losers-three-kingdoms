@@ -360,12 +360,21 @@
   body.mobile .m-name,
   body.mobile .m-chap,
   body.mobile .m-circle,
-  body.mobile .m-sheet-name,
   body.mobile .m-yt-marker,
   body.mobile #m-topbar h1,
   body.mobile #m-progress-bar{
     -webkit-user-select:none;
     user-select:none;
+  }
+  /* Explicitly allow text selection in sheet content */
+  body.mobile .m-sheet-name,
+  body.mobile .m-sheet-debut,
+  body.mobile .m-sheet-notes,
+  body.mobile .m-sheet-fail-item,
+  body.mobile .m-sheet-badge{
+    -webkit-user-select:text !important;
+    user-select:text !important;
+    -webkit-touch-callout:default !important;
   }
   /* Hide desktop elements on mobile */
   body.mobile #topbar,
@@ -411,27 +420,29 @@
     position:fixed;left:0;right:0;bottom:0;
     top:var(--m-header-h,140px);
     overflow:auto;
-    -webkit-overflow-scrolling:touch;
   }
   #m-content{
     position:relative;
+    display:grid;
+    /* grid-template-columns set inline per render */
     width:max-content;
   }
-  /* Header row (chapters) - sticky top */
-  .m-header-row{
-    display:flex;position:sticky;top:0;z-index:20;
-    background:var(--bg);border-bottom:1.5px solid #ccc;
-  }
   .m-corner{
-    width:84px;min-width:84px;height:46px;
-    position:sticky;left:0;z-index:40;
-    background:var(--bg);border-right:1.5px solid #ccc;
+    grid-row:1;grid-column:1;
+    height:46px;
+    position:sticky;top:0;left:0;z-index:40;
+    background:var(--bg);
+    border-right:1.5px solid #ccc;
+    border-bottom:1.5px solid #ccc;
   }
   .m-chap{
-    width:56px;min-width:56px;height:46px;
+    grid-row:1;
+    height:46px;
+    position:sticky;top:0;z-index:20;
+    background:var(--bg);
     display:flex;align-items:center;justify-content:center;
     font-size:14px;font-weight:700;color:#333;
-    position:relative;
+    border-bottom:1.5px solid #ccc;
   }
   .m-chap.current{background:#fff4e6;font-weight:900;color:#111}
   .m-yt-marker{
@@ -447,29 +458,25 @@
     margin-left:2px;
   }
   .m-chap.current .m-chap-num{margin-top:14px}
-  /* Character rows */
-  .m-row{
-    display:flex;height:54px;
-    border-bottom:1px dashed #dcdcdc;
-  }
   .m-name{
-    width:84px;min-width:84px;height:54px;
+    grid-column:1;
+    height:54px;
     position:sticky;left:0;z-index:10;
     background:var(--ink);color:#fff;
     display:flex;align-items:center;justify-content:center;
     font-size:17px;font-weight:800;letter-spacing:2px;
     border-right:1.5px solid #ccc;
+    border-bottom:1px dashed #dcdcdc;
     cursor:pointer;
   }
   .m-name.dead{background:var(--gray)}
   .m-name.absent{background:var(--alive-green)}
   .m-name:active{filter:brightness(1.2)}
-  .m-name .m-name-bg{
-    position:absolute;inset:6px 4px;border-radius:6px;
-    background:inherit;display:flex;align-items:center;justify-content:center;
-    box-shadow:0 2px 4px rgba(0,0,0,.12);
+  .m-track{
+    position:relative;
+    height:54px;
+    border-bottom:1px dashed #dcdcdc;
   }
-  .m-track{position:relative;height:54px}
   .m-line{
     position:absolute;top:50%;height:3px;background:var(--ink);
     transform:translateY(-50%);
@@ -485,10 +492,11 @@
   .m-circle.dead{border-color:var(--gray)}
   .m-circle.death-mark{background:var(--fail-red);border-color:var(--fail-red)}
   .m-circle.absent-mark{background:var(--alive-green);border-color:var(--alive-green)}
+  .m-circle.pressed{transform:translate(-50%,-50%) scale(1.3)}
+  /* invisible hit expansion for easier touch */
   .m-circle::after{
-    content:"";position:absolute;inset:-12px;border-radius:50%;
+    content:"";position:absolute;inset:-10px;border-radius:50%;
   }
-  .m-circle.pressed{transform:translate(-50%,-50%) scale(1.25)}
 
   /* Long-press tooltip */
   #m-tooltip{
@@ -497,7 +505,8 @@
     font-family:"Noto Serif TC",serif;white-space:nowrap;
     pointer-events:none;z-index:1000;
     box-shadow:0 6px 20px rgba(0,0,0,.3);
-    display:none;
+    display:none;max-width:calc(100vw - 24px);
+    white-space:normal;
   }
   #m-tooltip.show{display:block}
   #m-tooltip::after{
@@ -756,10 +765,7 @@
   </div>
 
   <div id="m-scroll">
-    <div id="m-content">
-      <div class="m-header-row" id="m-header-row"></div>
-      <div id="m-rows"></div>
-    </div>
+    <div id="m-content"></div>
   </div>
 </div>
 
@@ -777,7 +783,6 @@
     <div class="m-sheet-notes" id="m-sheet-notes"></div>
     <div class="m-sheet-fail-heading">失敗紀錄</div>
     <div class="m-sheet-fail-list" id="m-sheet-fail-list"></div>
-    <button class="m-sheet-close" id="m-sheet-close">關閉</button>
   </div>
 </div>
 
@@ -812,9 +817,6 @@
     </div>
     <div class="m-range-row">
       第 <input type="text" inputmode="numeric" id="m-f-lo" value="1"> 回 ～ 第 <input type="text" inputmode="numeric" id="m-f-hi" value="120"> 回
-    </div>
-    <div class="m-sheet-actions">
-      <button class="m-sheet-close" id="m-filter-close">完成</button>
     </div>
   </div>
 </div>
@@ -1125,16 +1127,20 @@ function renderMobile(){
   const lo = rangeLo, hi = rangeHi;
   const span = hi - lo + 1;
 
-  // Header row (chapters)
-  const headerRow = document.getElementById("m-header-row");
-  headerRow.innerHTML = "";
+  const content = document.getElementById("m-content");
+  content.innerHTML = "";
+  content.style.gridTemplateColumns = `${M_NAME_W}px repeat(${span}, ${M_COL_W}px)`;
+
+  // Row 1: corner + chapter header cells (all sticky top)
   const corner = document.createElement("div");
   corner.className = "m-corner";
-  headerRow.appendChild(corner);
+  content.appendChild(corner);
+
   const ytChap = data.progress && data.progress.chapter;
   for(let i=lo;i<=hi;i++){
     const cell = document.createElement("div");
     cell.className = "m-chap";
+    cell.style.gridColumn = String(i - lo + 2);
     if(i === ytChap){
       cell.classList.add("current");
       const yt = document.createElement("div");
@@ -1145,10 +1151,10 @@ function renderMobile(){
     num.className = "m-chap-num";
     num.textContent = i;
     cell.appendChild(num);
-    headerRow.appendChild(cell);
+    content.appendChild(cell);
   }
 
-  // Rows
+  // Character rows
   const visible = data.characters.filter(c=>{
     if(filterDead && isDead(c)) return false;
     if(filterAbsent && isAbsent(c)) return false;
@@ -1159,25 +1165,42 @@ function renderMobile(){
     return true;
   });
 
-  const rowsEl = document.getElementById("m-rows");
-  rowsEl.innerHTML = "";
+  // Track row index for each character id (for scroll-to-match)
+  const charRowMap = {};
 
-  visible.forEach(c=>{
-    const row = document.createElement("div");
-    row.className = "m-row";
+  visible.forEach((c, idx)=>{
+    const gridRow = idx + 2; // row 1 is the chapter header
+    charRowMap[c.id] = gridRow;
 
     const name = document.createElement("div");
     name.className = "m-name";
+    name.style.gridRow = String(gridRow);
+    name.style.gridColumn = "1";
     if(isDead(c)) name.classList.add("dead");
     else if(isAbsent(c)) name.classList.add("absent");
     name.textContent = c.name;
+    name.dataset.charId = c.id;
     if(searchTerm && !c.name.includes(searchTerm)) name.style.opacity = "0.15";
-    name.addEventListener("click", ()=>openInfoCardMobile(c.id));
-    row.appendChild(name);
+    name.addEventListener("click", ()=>{
+      // Tapping a name during search clears search state
+      if(searchTerm){
+        searchTerm = "";
+        const box = document.getElementById("m-searchbox");
+        if(box) box.value = "";
+        const sbg = document.getElementById("m-search-sheet-bg");
+        if(sbg) sbg.classList.remove("open");
+      }
+      openInfoCardMobile(c.id);
+      // Re-render to clear the dim effect
+      render();
+    });
+    content.appendChild(name);
 
     const track = document.createElement("div");
     track.className = "m-track";
-    track.style.width = (span * M_COL_W) + "px";
+    track.style.gridRow = String(gridRow);
+    track.style.gridColumn = "2 / -1";
+    if(searchTerm && !c.name.includes(searchTerm)) track.style.opacity = "0.15";
 
     // Line
     const lineStartChap = Math.max(c.debut, lo);
@@ -1195,7 +1218,7 @@ function renderMobile(){
       track.appendChild(line);
     }
 
-    // Circles
+    // Circles — long-press shows tooltip
     (c.failures||[]).forEach(f=>{
       if(f.chap < lo || f.chap > hi) return;
       const ci = document.createElement("div");
@@ -1211,41 +1234,48 @@ function renderMobile(){
       track.appendChild(ci);
     });
 
-    if(searchTerm && !c.name.includes(searchTerm)) track.style.opacity = "0.15";
-    row.appendChild(track);
-    rowsEl.appendChild(row);
+    content.appendChild(track);
   });
+
+  // Scroll to first match if searching
+  if(searchTerm){
+    const firstMatch = visible.find(c=>c.name.includes(searchTerm));
+    if(firstMatch){
+      const targetRow = charRowMap[firstMatch.id];
+      const scroll = document.getElementById("m-scroll");
+      // Row 1 = header (46px), subsequent rows are ROW_H each
+      const targetY = 46 + (targetRow - 2) * M_ROW_H - 60; // a bit above center
+      scroll.scrollTo({top: Math.max(0, targetY), behavior: "smooth"});
+    }
+  }
 }
 
-// Long-press on failure circles
+// Long-press on failure circles — no vibration
 function attachCircleLongPress(el){
   let timer = null;
   let active = false;
-  const tip = document.getElementById("m-tooltip");
   const startX = {v:0}, startY = {v:0};
 
   const showTip = ()=>{
+    const tip = document.getElementById("m-tooltip");
     const prefix = el.dataset.type==="death" ? "【退場】" : (el.dataset.type==="absent" ? "【中離】" : "");
     tip.textContent = "第 " + el.dataset.chap + " 回：" + prefix + el.dataset.reason;
     tip.classList.add("show");
-    const rect = el.getBoundingClientRect();
-    tip.style.left = "0px";
-    tip.style.top = "0px";
     // position after showing so width is known
     requestAnimationFrame(()=>{
+      const rect = el.getBoundingClientRect();
       const tipRect = tip.getBoundingClientRect();
       let left = rect.left + rect.width/2 - tipRect.width/2;
       left = Math.max(10, Math.min(window.innerWidth - tipRect.width - 10, left));
       const top = rect.top - tipRect.height - 12;
       tip.style.left = left + "px";
-      tip.style.top = top + "px";
+      tip.style.top = Math.max(10, top) + "px";
     });
     el.classList.add("pressed");
-    if(navigator.vibrate) try{ navigator.vibrate(15); }catch(_){}
   };
   const hideTip = ()=>{
     clearTimeout(timer);
-    tip.classList.remove("show");
+    document.getElementById("m-tooltip").classList.remove("show");
     el.classList.remove("pressed");
     active = false;
   };
@@ -1256,7 +1286,7 @@ function attachCircleLongPress(el){
     active = true;
     timer = setTimeout(()=>{
       if(active) showTip();
-    }, 220);
+    }, 260);
   }, {passive:true});
   el.addEventListener("touchmove",(e)=>{
     const dx = e.touches[0].clientX - startX.v;
@@ -1310,7 +1340,9 @@ function openInfoCardMobile(id){
   }
 
   document.getElementById("m-sheet-bg").classList.add("open");
-  if(navigator.vibrate) try{ navigator.vibrate(10); }catch(_){}
+  const sheet = document.getElementById("m-sheet");
+  sheet.style.transition = "";
+  sheet.style.transform = "";
 }
 
 // Unified entry point routing to desktop or mobile card
@@ -1319,24 +1351,104 @@ function openInfoCardRouted(id){
   else openInfoCard(id);
 }
 
-// Mobile sheet close handlers
-document.getElementById("m-sheet-close").onclick = ()=>{
-  document.getElementById("m-sheet-bg").classList.remove("open");
-};
+// Mobile sheet dismiss by tap outside
 document.getElementById("m-sheet-bg").addEventListener("click",(e)=>{
   if(e.target.id === "m-sheet-bg") document.getElementById("m-sheet-bg").classList.remove("open");
 });
+
+// Draggable info sheet — drag from handle area
+(function setupSheetDrag(){
+  const sheet = document.getElementById("m-sheet");
+  const bg = document.getElementById("m-sheet-bg");
+  let startY = null;
+  let dragging = false;
+
+  sheet.addEventListener("touchstart",(e)=>{
+    const touch = e.touches[0];
+    const rect = sheet.getBoundingClientRect();
+    const offsetY = touch.clientY - rect.top;
+    // Only allow drag from the top 44px (handle area)
+    if(offsetY > 44) return;
+    startY = touch.clientY;
+    dragging = true;
+    sheet.style.transition = "none";
+  }, {passive:true});
+
+  sheet.addEventListener("touchmove",(e)=>{
+    if(!dragging) return;
+    const dy = e.touches[0].clientY - startY;
+    if(dy < 0){
+      sheet.style.transform = "translateY(0)";
+      return;
+    }
+    sheet.style.transform = `translateY(${dy}px)`;
+  }, {passive:true});
+
+  const endDrag = ()=>{
+    if(!dragging) return;
+    dragging = false;
+    sheet.style.transition = "";
+    const t = sheet.style.transform;
+    const match = t.match(/translateY\(([\d.]+)px\)/);
+    const dy = match ? parseFloat(match[1]) : 0;
+    if(dy > 100){
+      // Close: slide down, then hide
+      sheet.style.transform = "";
+      bg.classList.remove("open");
+    } else {
+      // Snap back
+      sheet.style.transform = "";
+    }
+  };
+  sheet.addEventListener("touchend", endDrag);
+  sheet.addEventListener("touchcancel", endDrag);
+})();
 
 // Mobile filter sheet
 document.getElementById("m-filter-btn").onclick = ()=>{
   document.getElementById("m-filter-sheet-bg").classList.add("open");
 };
-document.getElementById("m-filter-close").onclick = ()=>{
-  document.getElementById("m-filter-sheet-bg").classList.remove("open");
-};
 document.getElementById("m-filter-sheet-bg").addEventListener("click",(e)=>{
   if(e.target.id === "m-filter-sheet-bg") document.getElementById("m-filter-sheet-bg").classList.remove("open");
 });
+// Draggable filter sheet
+(function setupFilterSheetDrag(){
+  const sheet = document.getElementById("m-filter-sheet");
+  const bg = document.getElementById("m-filter-sheet-bg");
+  if(!sheet || !bg) return;
+  let startY = null;
+  let dragging = false;
+
+  sheet.addEventListener("touchstart",(e)=>{
+    const touch = e.touches[0];
+    const rect = sheet.getBoundingClientRect();
+    const offsetY = touch.clientY - rect.top;
+    if(offsetY > 44) return;
+    startY = touch.clientY;
+    dragging = true;
+    sheet.style.transition = "none";
+  }, {passive:true});
+
+  sheet.addEventListener("touchmove",(e)=>{
+    if(!dragging) return;
+    const dy = e.touches[0].clientY - startY;
+    if(dy < 0){ sheet.style.transform = "translateY(0)"; return; }
+    sheet.style.transform = `translateY(${dy}px)`;
+  }, {passive:true});
+
+  const endDrag = ()=>{
+    if(!dragging) return;
+    dragging = false;
+    sheet.style.transition = "";
+    const t = sheet.style.transform;
+    const match = t.match(/translateY\(([\d.]+)px\)/);
+    const dy = match ? parseFloat(match[1]) : 0;
+    sheet.style.transform = "";
+    if(dy > 100) bg.classList.remove("open");
+  };
+  sheet.addEventListener("touchend", endDrag);
+  sheet.addEventListener("touchcancel", endDrag);
+})();
 document.getElementById("m-f-dead").onchange = (e)=>{ filterDead=e.target.checked; render(); };
 document.getElementById("m-f-absent").onchange = (e)=>{ filterAbsent=e.target.checked; render(); };
 document.getElementById("m-f-active").onchange = (e)=>{ filterActive=e.target.checked; render(); };
