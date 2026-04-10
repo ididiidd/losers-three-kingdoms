@@ -448,10 +448,14 @@
   #m-scroll{
     position:absolute;top:46px;left:84px;right:0;bottom:0;
     overflow:auto;
-    overscroll-behavior:contain;
+    overscroll-behavior:none;
+    background:var(--bg);
   }
   #m-tracks-wrap{
     position:relative;width:max-content;
+    min-height:calc(100% + 2px);
+    min-width:calc(100% + 2px);
+    background:var(--bg);
   }
   .m-chap{
     width:56px;min-width:56px;height:46px;
@@ -1527,6 +1531,16 @@ mobileMQ.addEventListener("change", ()=>{
   scrollEl.addEventListener("scroll", ()=>{
     headerTrack.style.transform = `translate3d(${-scrollEl.scrollLeft}px, 0, 0)`;
     namesTrack.style.transform = `translate3d(0, ${-scrollEl.scrollTop}px, 0)`;
+  }, {passive:true});
+
+  // iOS rubber-band prevention: nudge 1px inward on touchstart if at boundary
+  scrollEl.addEventListener("touchstart", ()=>{
+    const maxTop = scrollEl.scrollHeight - scrollEl.clientHeight;
+    const maxLeft = scrollEl.scrollWidth - scrollEl.clientWidth;
+    if(scrollEl.scrollTop <= 0) scrollEl.scrollTop = 1;
+    if(scrollEl.scrollTop >= maxTop) scrollEl.scrollTop = maxTop - 1;
+    if(scrollEl.scrollLeft <= 0) scrollEl.scrollLeft = 1;
+    if(scrollEl.scrollLeft >= maxLeft) scrollEl.scrollLeft = maxLeft - 1;
   }, {passive:true});
 })();
 
